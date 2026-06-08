@@ -1,0 +1,22 @@
+# ============================================================
+# GEMINI VISION — Analyse IA des documents médicaux (GRATUIT)
+# ============================================================
+#
+# 1. Obtenez votre clé API GRATUITE sur :
+#    https://aistudio.google.com/app/apikey
+#    → Cliquez "Create API Key" → Copiez la clé (AIzaSy...)
+#
+# 2. Ajoutez cette ligne dans votre application.properties :
+
+gemini.api.key=AIzaSy_VOTRE_CLE_ICI
+
+# ============================================================
+# Modèle utilisé : gemini-1.5-flash
+# - Gratuit : 15 requêtes/minute, 1 500 requêtes/jour
+# - Supporte images JPEG, PNG, WebP et PDF
+# - Parfait pour analyser des documents médicaux
+# ============================================================
+#
+# Si la clé est absente ou vide, le système utilise
+# automatiquement la simulation (comportement précédent).
+# ============================================================

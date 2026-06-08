@@ -1,0 +1,70 @@
+═══════════════════════════════════════════════════════
+  CHAMPS À AJOUTER dans DocumentMedical.java (Entity)
+═══════════════════════════════════════════════════════
+
+// Champ déjà existant :
+private BigDecimal montantDetecteIA;   // montant TTC facturé
+private String resultatIA;             // rapport texte
+private Double scoreConfidenceIA;
+
+// NOUVEAUX CHAMPS À AJOUTER :
+
+@Column(precision = 10, scale = 3)
+private BigDecimal montantRembourseIA;  // montant remboursable calculé
+
+@Column(columnDefinition = "TEXT")
+private String analyseIAJson;           // JSON complet retourné par Python/Gemini
+
+@Column
+private LocalDateTime analyseAt;        // timestamp fin d'analyse
+
+═══════════════════════════════════════════════════════
+  MIGRATION SQL (si base déjà existante)
+═══════════════════════════════════════════════════════
+
+ALTER TABLE document_medical
+  ADD COLUMN montant_rembourse_ia DECIMAL(10,3),
+  ADD COLUMN analyse_ia_json TEXT,
+  ADD COLUMN analyse_at TIMESTAMP;
+
+═══════════════════════════════════════════════════════
+  DANS DocumentDTO / DocumentResponse (réponse API)
+═══════════════════════════════════════════════════════
+
+Ajouter ces champs dans le DTO envoyé au frontend :
+
+private BigDecimal montantRembourseIA;
+private String     analyseIAJson;      // ← Angular le parse comme "analyseIA"
+
+Dans le mapper :
+  dto.setAnalyseIAJson(doc.getAnalyseIAJson());
+  dto.setMontantRembourseIA(doc.getMontantRembourseIA());
+
+═══════════════════════════════════════════════════════
+  Dans Angular (models.ts) — Document interface
+═══════════════════════════════════════════════════════
+
+export interface DocumentMedical {
+  id: number;
+  nomFichier: string;
+  type: string;
+  contentType: string;
+  statutIA: 'EN_ATTENTE' | 'VALIDE' | 'INVALIDE' | 'ERREUR';
+  montantDetecteIA?: number;
+  montantRembourseIA?: number;   // nouveau
+  resultatIA?: string;
+  analyseIA?: any;               // JSON complet parsé (analyseIAJson côté Java)
+  scoreConfidenceIA?: number;
+}
+
+Note : Angular reçoit analyseIAJson comme string, il faut le parser dans le DTO
+ou renommer le champ. Option la plus simple : dans DocumentResponse.java,
+ajouter un getter :
+
+  public Object getAnalyseIA() {
+      if (this.analyseIAJson == null) return null;
+      try {
+          return new ObjectMapper().readValue(this.analyseIAJson, Object.class);
+      } catch (Exception e) { return null; }
+  }
+
